@@ -13,7 +13,6 @@ const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60 * 1000;
 export const SignUp = async (req, res) => {
     try {
         const { username, password, email, firstname, lastname } = req.body;
-
         if (!username || !password || !email || !firstname || !lastname) {
             return res.status(400).json({ message: 'All fields are required.' });
         }
@@ -93,3 +92,23 @@ export const SignIn = async (req, res) => {
         res.status(500).json({ message: 'Internal server error.' });
     }
 };
+
+export const SignOut = async (req, res) => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) {
+            return res.status(400).json({ message: 'Refresh token not found.' });
+        }
+
+        await Session.deleteOne({ refreshToken });
+
+        res.clearCookie('refreshToken');
+
+        return res.status(204).json({ message: 'Sign out successful.' });
+
+    } catch (error) {
+        console.error('Error during sign out:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
